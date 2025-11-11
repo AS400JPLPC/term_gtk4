@@ -1,0 +1,10 @@
+# Fichiers compilés
+TermHX
+*.o
+*.a
+*.so
+
+# Fichiers temporaires
+*.swp
+*.swo
+*.bak
