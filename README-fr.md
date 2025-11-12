@@ -174,3 +174,6 @@ TermHX
 
 ![](/asset/2025112_012345_TermHX4-01.png)
 <br />
+
+
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
