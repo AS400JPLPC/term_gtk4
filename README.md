@@ -144,7 +144,7 @@ Consistent user experience:
 Libadwaita dialogs follow GNOME guidelines, ensuring a consistent look and feel with other modern applications.
 
 
-
+The “TermADW” module does not use the adwaita library for decoration. Everything is written in pure GTK.
 
 example:
 PS: Don't forget to change the “soleil” directory.

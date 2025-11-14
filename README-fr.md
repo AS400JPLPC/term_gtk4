@@ -151,6 +151,9 @@ Les dialogues de libadwaita suivent les guidelines GNOME, ce qui garantit une ap
 
 
 
+le module "TermADW" n'utilise  la lib adwaita pour la décoration.  tout est écrit pure GTK
+
+
 <br />
 example:
 PS : n'oubliez de changer le répertoire "soleil"
