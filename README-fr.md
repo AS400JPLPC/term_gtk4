@@ -42,9 +42,9 @@ Simplicité et légèreté
 Pas de dépendances lourdes, pas de fonctionnalités superflues. Votre outil fait une chose et la fait bien.
 
 
-Commande :
+Commande  exemple :
 ```
-./TermHX "Mon Projet" ~/dev/mon_projet/src
+./Term??? "Mon Projet"  ~/TerminalHX
 ```
 "Mon Projet" :
 Ce paramètre est utilisé pour personnaliser le titre de la fenêtre GTK.
@@ -151,7 +151,7 @@ Les dialogues de libadwaita suivent les guidelines GNOME, ce qui garantit une ap
 
 
 
-le module "TermADW" n'utilise  la lib adwaita pour la décoration.  tout est écrit pure GTK
+le module "TermGTK" n'utilise  la lib adwaita pour la décoration.  tout est écrit pure GTK
 
 
 <br />
@@ -159,7 +159,7 @@ example:
 PS : n'oubliez de changer le répertoire "soleil"
 <br />
 ```
-make -C /home/soleil/TerminalHX/ -f ./src_c/MakefileTermHX4 PROD=false clean all PGM=TermHX4
+make -C /home/soleil/TerminalHX/ -f ./src_c/MakefileTermADW PROD=false clean all PGM=TermADW
 ```
 <br />
 
@@ -167,7 +167,7 @@ myprojet
 
 <br />
 
-![](/asset/20251112_012619_myProjet.png)
+![](asset/20251112_012619_myProjet.png)
 <br />
 
 <br />
@@ -175,7 +175,7 @@ TermHX
 
 <br />
 
-![](/asset/2025112_012345_TermHX4-01.png)
+![](asset/2025112_012345_TermADW-01.png)
 <br />
 
 

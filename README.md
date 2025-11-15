@@ -84,7 +84,7 @@ Unauthorized program:
 The wrapper closes with the EXIT_FAILURE code.
 Invalid arguments:
 The wrapper requires 3 or 4 arguments (see 2.3).
-for the "TermHX4" program
+for the "TermADW" program
 
 no parameters for the "myterm" program (nominative)
 
@@ -144,7 +144,7 @@ Consistent user experience:
 Libadwaita dialogs follow GNOME guidelines, ensuring a consistent look and feel with other modern applications.
 
 
-The “TermADW” module does not use the adwaita library for decoration. Everything is written in pure GTK.
+The “TermGTK” module does not use the adwaita library for decoration. Everything is written in pure GTK.
 
 example:
 PS: Don't forget to change the “soleil” directory.
@@ -152,7 +152,7 @@ PS: Don't forget to change the “soleil” directory.
 <br />
 
 ```
-make -C /home/soleil/TerminalHX/ -f ./src_c/MakefileTermHX4 PROD=false clean all PGM=TermHX4
+make -C /home/soleil/TerminalHX/ -f ./src_c/MakefileTermADW PROD=false clean all PGM=TermADW
 ```
 <br />
 
@@ -160,15 +160,15 @@ myprojet
 
 <br />
 
-![](/asset/20251112_012619_myProjet.png)
+![](asset/20251112_012619_myProjet.png)
 <br />
 
 <br />
-TermHX
+TermADW   call helix
 
 <br />
 
-![](/asset/2025112_012345_TermHX4-01.png)
+![](asset/2025112_012345_TermADW-01.png)
 <br />
 
 
