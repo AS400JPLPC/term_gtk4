@@ -2,12 +2,12 @@
 #include <sys/stat.h>
 
 #include <vte/vte.h>
-//#include <gtk-4.0/gtk/gtk.h>
 #include <adwaita.h>
 
 
 GtkWidget *window, *terminal;
-GtkAlertDialog *Alertdialog;
+AdwDialog *dialog;
+AdwAlertDialog *Alertdialog;
 
 GPid child_pid = 0;
 
@@ -19,7 +19,7 @@ GPid child_pid = 0;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 constexpr unsigned long long int strswitch(const char* c_name, unsigned long long int l_hash = 0)
 {
-	/// string to int for switch
+    /// string to int for switch
 	return (*c_name == 0) ? l_hash : 101 * strswitch(c_name + 1) + *c_name;
 }
 
@@ -78,7 +78,7 @@ inline bool isDir_File(const std::string& name) {
 /// -----------------------------------------------------------------------------
 void term_spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpointer user_data)
 {
-	child_pid = pid;
+		child_pid = pid;
 }
 
 /// -----------------------------------------------------------------------------
@@ -96,41 +96,48 @@ void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 ///-------------------------------------
 
 void close_window() {
-	gtk_window_destroy(GTK_WINDOW(window));
+
+    gtk_window_destroy(GTK_WINDOW(window));
+
+
 }
 
 
-gboolean dialog_cb (GObject *source_object, GAsyncResult *res, gpointer user_data) {
-  	GtkAlertDialog *dialog = GTK_ALERT_DIALOG (source_object);
-	GError *err = NULL;
-	int button= gtk_alert_dialog_choose_finish (GTK_ALERT_DIALOG(dialog), res, &err);
+gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget   *self)
+{
+  const char *response = adw_alert_dialog_choose_finish (dialog, result);
 
+    if (g_str_equal(response, "cancel"))
 
-	if (button == 0)
+    {
+       // g_print("no\n");
+       return TRUE;
+    }
 
-	{
-		gtk_window_present (GTK_WINDOW(window));
+    if (g_str_equal(response, "scratch"))
 
-		return TRUE;
-	}
-
-	if (button == 1)
-
-	{
-		gtk_window_destroy(GTK_WINDOW(window));
-	}
-	return FALSE;
+    {
+        gtk_window_destroy(GTK_WINDOW(self));
+    }
+    return FALSE;
 }
 
 
 static void showAlert_cb()
 {
 
-	gtk_alert_dialog_choose (GTK_ALERT_DIALOG(Alertdialog), GTK_WINDOW(window),
-							NULL, (GAsyncReadyCallback) dialog_cb, NULL);
+    dialog = adw_alert_dialog_new ("close please confirm", NULL);
+    adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog),
+                                  "cancel",  "_Cancel",
+                                  "scratch", "_Scratch",
+                                  NULL);
+    Alertdialog = ADW_ALERT_DIALOG (dialog);
+    adw_alert_dialog_choose (Alertdialog, GTK_WIDGET (window),
+                           NULL, (GAsyncReadyCallback) dialog_cb, window);
 
-	gtk_window_present (GTK_WINDOW(window));
-	g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
+    adw_dialog_present (dialog, window);
+
+    g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
 
 }
 /// -----------------------------------------------------------------------------
@@ -140,9 +147,9 @@ static void showAlert_cb()
 void	init_Terminal()
 {
 
-	unsigned int COL=	126;// 120 cols  src
-	unsigned int ROW =	43;// 42  lines src
-	#define VTEFONT	"Source code Pro"
+    unsigned int COL=	126;// 120 cols  src
+    unsigned int ROW =	43;// 42  lines src
+    #define VTEFONT	"Source code Pro"
 	VteTerminal *VTE;
 
 	gchar * font_terminal = (char*) malloc (50);
@@ -186,7 +193,7 @@ int main (int   argc,   char *argv[])  {
 
 
 	std::setlocale(LC_ALL, "");
-	gchar *pgm_1[]  = { (gchar*)WORKPGM,  NULL}; // hx
+    gchar *pgm_1[]  = { (gchar*)WORKPGM,  NULL}; // hx
 
 
 
@@ -197,60 +204,59 @@ int main (int   argc,   char *argv[])  {
 
 
 
-	gchar ** command ;
+    gchar ** command ;
 
 	gchar *Title  = (char*) malloc (200);
 	sprintf(Title,"Project: %s",(gchar*) argv[1] ); // PROJECT
 //printf("\n debug %s", Title);
 
 	const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
-	/// -----------------------------------------------------------------------------
-	/// -----------------------------------------------------------------------------
-	/// -----------------------------------------------------------------------------
-	/// 4 argument
-	/// 0= le programe TermHX
-	/// 1= Project
-	/// 2= directory working
-	/// 3= file option 66
-	/// contrôle autorisation traitement --> protection
-	/// BUTTON CLOSE off
-	/// ALT-F4 CLOSE windows HX
-	/// Button mini / maxi ON
+    /// -----------------------------------------------------------------------------
+    /// -----------------------------------------------------------------------------
+    /// -----------------------------------------------------------------------------
+    /// 4 argument
+    /// 0= le programe TermHX
+    /// 1= Project
+    /// 2= directory working
+    /// 3= file option 66
+    /// contrôle autorisation traitement --> protection
+    /// BUTTON CLOSE off
+    /// ALT-F4 CLOSE windows HX
+    /// Button mini / maxi ON
 
-	if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
+    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
 //printf(" nbr argc %d", argc);
 
-		if (argc >4 || argc < 3 )  return EXIT_FAILURE;
-
-		if (argc == 3) {
-			command = pgm_1;
+        if (argc >4 || argc < 3 )  return EXIT_FAILURE;
+        if (argc == 3) {
+            command = pgm_1;
 //printf("\n debug %s", (gchar*)WORKPGM);
-		}
+        }
+        if (argc == 4) {
+            command = pgm_2;
 
-		if (argc == 4) {
-			command = pgm_2;
-		};
-
-
-	adw_init ();
-
-	window = gtk_window_new ();
+        };
 
 
-	gtk_window_set_title(GTK_WINDOW(window),Title);
-
-	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
-
-	gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
-
-	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
+    adw_init ();
+    window = gtk_window_new ();
 
 
-	// specific initialization of the terminal
-	terminal = vte_terminal_new();
+
+    gtk_window_set_title(GTK_WINDOW(window),Title);
+
+    gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
+
+    gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
+
+    gtk_window_set_modal(GTK_WINDOW(window),TRUE);
+
+
+    // specific initialization of the terminal
+    terminal = vte_terminal_new();
 	init_Terminal();
 
-	//vte_terminal_spawn_async(
+    //vte_terminal_spawn_async(
 	vte_terminal_spawn_async(
 		VTE_TERMINAL(terminal), //VteTerminal *terminal
 		VTE_PTY_DEFAULT, // VtePtyFlags pty_flags,
@@ -269,35 +275,21 @@ int main (int   argc,   char *argv[])  {
 		&term_spawn_callback,   // VteTerminalSpawnAsyncCallback callback, get pid child
 
 		NULL
-	);
+    );
 
-	gtk_window_set_child(GTK_WINDOW(window), terminal);
+    gtk_window_set_child(GTK_WINDOW(window), terminal);
 
-	g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
-	g_signal_connect(terminal,"child-exited", G_CALLBACK (close_window), NULL);
-	g_signal_connect(terminal, "resize-window", G_CALLBACK(on_resize_window),NULL);
+    g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
+    g_signal_connect(terminal,"child-exited", G_CALLBACK (close_window), NULL);
+    g_signal_connect(terminal, "resize-window", G_CALLBACK(on_resize_window),NULL);
 
 
+    gtk_window_present (GTK_WINDOW(window));
 
-	Alertdialog = gtk_alert_dialog_new("DANGER");
-	const char* buttons[] = {"Cancel","Scratch",NULL};
-	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Contents of the message");
-	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
-	//gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 0);
-	//gtk_alert_dialog_set_cancel_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
-	gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
+    while (g_list_model_get_n_items (gtk_window_get_toplevels ()) > 0)
+        g_main_context_iteration (NULL, TRUE);
 
 
 
-
-
-
-	gtk_window_present (GTK_WINDOW(window));
-
-	while (g_list_model_get_n_items (gtk_window_get_toplevels ()) > 0)
-		g_main_context_iteration (NULL, TRUE);
-
-
-
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
