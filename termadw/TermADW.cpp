@@ -107,14 +107,14 @@ gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget 
 {
   const char *response = adw_alert_dialog_choose_finish (dialog, result);
 
-    if (g_str_equal(response, "cancel"))
+    if (g_str_equal(response, "no"))
 
     {
        // g_print("no\n");
        return TRUE;
     }
 
-    if (g_str_equal(response, "scratch"))
+    if (g_str_equal(response, "yes"))
 
     {
         gtk_window_destroy(GTK_WINDOW(self));
@@ -126,14 +126,19 @@ gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget 
 static void showAlert_cb()
 {
 
-    dialog = adw_alert_dialog_new ("close please confirm", NULL);
+    dialog = adw_alert_dialog_new ("confirm destroy Application", NULL);
     adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog),
-                                  "cancel",  "_Cancel",
-                                  "scratch", "_Scratch",
+                                  "yes",   "_YES",
+                                  "no",    "_NO",
                                   NULL);
+
+
     Alertdialog = ADW_ALERT_DIALOG (dialog);
     adw_alert_dialog_choose (Alertdialog, GTK_WIDGET (window),
                            NULL, (GAsyncReadyCallback) dialog_cb, window);
+
+	adw_alert_dialog_set_default_response(  Alertdialog, "no");
+
 
     adw_dialog_present (dialog, window);
 

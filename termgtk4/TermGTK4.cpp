@@ -108,16 +108,18 @@ gboolean dialog_cb (GObject *source_object, GAsyncResult *res, gpointer user_dat
 	if (button == 0)
 
 	{
+		gtk_window_destroy(GTK_WINDOW(window));
+	}
+
+
+	if (button == 1)
+
+	{
 		gtk_window_present (GTK_WINDOW(window));
 
 		return TRUE;
 	}
 
-	if (button == 1)
-
-	{
-		gtk_window_destroy(GTK_WINDOW(window));
-	}
 	return FALSE;
 }
 
@@ -232,7 +234,7 @@ int main (int   argc,   char *argv[])  {
 
 //==============================================================================================
 //==============================================================================================
-	adw_init ();
+	gtk_init ();
 
 	window = gtk_window_new ();
 
@@ -279,12 +281,11 @@ int main (int   argc,   char *argv[])  {
 
 
 
-	Alertdialog = gtk_alert_dialog_new("DANGER");
-	const char* buttons[] = {"Cancel","Scratch",NULL};
+	Alertdialog = gtk_alert_dialog_new("confirm destroy Application");
+	const char* buttons[] = {"YES","NO",NULL};
 	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Contents of the message");
 	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
-	//gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 0);
-	//gtk_alert_dialog_set_cancel_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
+	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
 	gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
 
 
