@@ -15,7 +15,7 @@
 
 #include <vte/vte.h>
 #include <adwaita.h>
-
+#include <glib/gprintf.h>
 
 
 
@@ -25,16 +25,9 @@
 /// ex:
 ///------------------------------------------
 
+#define WORKPGM        "./Gencurs"   // pour mes tests
+
 #define VTENAME "VTE-TERM3270"
-
-unsigned int COL=    168;    /// max 132
-
-unsigned int ROW =    44;        /// max 42 including a line for the system
-
-
-#define WORKPGM        "./defrep"
-
-
 //*******************************************************
 // PROGRAME
 //*******************************************************
@@ -67,7 +60,7 @@ bool ctrlPgm(std::string v_TEXT)
     std::filesystem::path p(v_TEXT.c_str());
                                             switch(strswitch(p.stem().c_str()))
                                             {
-                                                case  strswitch("defrep")        : b_pgm =TRUE;        break;
+                                                case  strswitch("Gencurs")        : b_pgm =TRUE;        break;
                                             }
     return b_pgm;
 }
@@ -75,10 +68,11 @@ bool ctrlPgm(std::string v_TEXT)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
-///        traitement terminal GTK.
+///        traitement windows GTK.
 ///
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void close_window()
 {
     gtk_window_destroy(GTK_WINDOW(window));
@@ -92,14 +86,14 @@ gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget 
 {
   const char *response = adw_alert_dialog_choose_finish (dialog, result);
 
-    if (g_str_equal(response, "cancel"))
+    if (g_str_equal(response, "no"))
 
     {
        // g_print("no\n");
        return TRUE;
     }
 
-    if (g_str_equal(response, "scratch"))
+    if (g_str_equal(response, "yes"))
 
     {
         gtk_window_destroy(GTK_WINDOW(self));
@@ -108,29 +102,66 @@ gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget 
 }
 
 
+
 static void showAlert_cb()
 {
 
-    dialog = adw_alert_dialog_new ("DANGER-CLOSE ?-!", NULL);
+    dialog = adw_alert_dialog_new ("confirm destroy Application", NULL);
+
+
+	adw_alert_dialog_set_body (ADW_ALERT_DIALOG (dialog), "Please be careful");
+
+
     adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog),
-                                  "cancel",  "_Cancel",
-                                  "scratch", "_Scratch",
+                                  "yes",   "_YES",
+                                  "no",    "_NO",
                                   NULL);
+
+
     Alertdialog = ADW_ALERT_DIALOG (dialog);
     adw_alert_dialog_choose (Alertdialog, GTK_WIDGET (window),
                            NULL, (GAsyncReadyCallback) dialog_cb, window);
+
+	adw_alert_dialog_set_default_response(  Alertdialog, "no");
+
 
     adw_dialog_present (dialog, window);
 
     g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
 
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+///        traitement terminal.
+///
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 /// -----------------------------------------------------------------------------
 /// personalisation projet utilisant une terminal simplifier pour de la gestion
 /// -----------------------------------------------------------------------------
 
 void	init_Terminal()
 {
+
+
+	VteTerminal *VTE;
+
+    #define VTEFONT	"Source code Pro"
+
+
+	gchar * font_terminal = (char*) malloc (50);
+
+	/// confortable and extend numbers columns and rows
+	// HELIX
+
+    unsigned int COL=	168;
+    unsigned int ROW =	42;
+
 
     //determines the maximum size for screens
     Display* d = XOpenDisplay(NULL);
@@ -140,33 +171,20 @@ void	init_Terminal()
     gint height = DisplayHeight(d, s);
 
 
-    #define VTEFONT	"Source code Pro"
-	VteTerminal *VTE;
-
-	gchar * font_terminal = (char*) malloc (50);
-
-	/// confortable and extend numbers columns and rows
-	// HELIX
-
-
-    /// confortable and extend numbers columns and rows
-
     if ( width <= 1600 && height >=1024 ) {                // ex: 13"... 15"
-        sprintf(font_terminal,"%s  %s" , VTEFONT,"10");
-        COL = 168;
-        ROW = 44;
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"10");
         }
     else if ( width <= 1920 && height >=1080 ) {           // ex: 17"... 32"
-        sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
-        COL = 168;
-        ROW = 44;
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
         }
-    else if ( width > 1920  ) {                               //  ex: 2560 x1600 > 27"  font 13
-        sprintf(font_terminal,"%s  %s" , VTEFONT,"13");          //  ex: 3840 x2160 > 32"  font 15
-        COL = 168;
-        ROW = 44;
+    else if ( width > 1920 && width<= 2560  ) {            //  ex: 2560 x1600 > 27"  font 13
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
     }
-    //C
+    else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 13
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
+    }
+
+
 
 	// resize  title  font
 
@@ -202,11 +220,11 @@ void term_spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpointe
 {
         child_pid = pid;
 }
+
+
 /// -----------------------------------------------------------------------------
 /// possibility to change the name of the terminal
 /// -----------------------------------------------------------------------------
-
-
 void on_title_changed(GtkWidget *terminal)
 {
     const char *title;
@@ -220,19 +238,20 @@ void on_title_changed(GtkWidget *terminal)
 
 void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 {
-
 	vte_terminal_set_size (VTE_TERMINAL(terminal),_col,_row);
-
+	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1);
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///
+///        control Parametre.
+///
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-
-/// -----------------------------------------------------------------------------
-///  libvte function putting the terminal function active
-/// -----------------------------------------------------------------------------
-
+// programme linux test file
 inline bool exists_File (const std::string& name) {
     struct stat fileStat;
     if(stat(name.c_str(),&fileStat) < 0) return FALSE;      // is exist objet
@@ -253,6 +272,8 @@ inline bool extention_File(const std::string& name) {
         return TRUE;
 }
 
+
+// programme linux test is dir
 inline bool isDir_File(const std::string& name) {
         std::string strdir = std::filesystem::path(name.c_str()).parent_path();
         if (strdir.empty() ) return FALSE;
@@ -277,26 +298,28 @@ int main(int argc, char *argv[])
 
 
     gchar *arg_1[] = { (gchar*)WORKPGM,  NULL};
-    gchar *arg_2[] = { (gchar*) argv[1], NULL};        /// arg[1] P_pgm
     // exemple P_Pgm (argv[1]) = ./programme
+	gchar *arg_2[] =  { (gchar*) argv[1],(gchar*)"-c", (gchar*) argv[2], NULL};	    /// arg[2] P_pgm , [2] Pid_msgq
+
+
+
 
     if (argc == 1 )  {
         if ( FALSE == ctrlPgm(WORKPGM))                    return EXIT_FAILURE;    // contrôle file autorisation
-        if ( FALSE == exists_File(WORKPGM) )             return EXIT_FAILURE;    // contrôle si programme
-        dir = std::filesystem::path(WORKPGM).parent_path().c_str();
+        if ( FALSE == exists_File(WORKPGM) )               return EXIT_FAILURE;    // contrôle si programme
         command = arg_1;
     }
     if (argc == 2 )  {
-        if ( FALSE == ctrlPgm((char*)argv[1]))            return EXIT_FAILURE;    // contrôle file autorisation
-        if ( FALSE == extention_File((char*)argv[1]) )    return EXIT_FAILURE;    // contrôle extention
-        if ( FALSE == isDir_File((char*)argv[1]) )         return EXIT_FAILURE;     // contrôle is directorie
+        if ( FALSE == ctrlPgm((char*)argv[1]))             return EXIT_FAILURE;    // contrôle file autorisation
+        if ( FALSE == extention_File((char*)argv[1]) )     return EXIT_FAILURE;    // contrôle extention
+        if ( FALSE == isDir_File((char*)argv[1]) )         return EXIT_FAILURE;    // contrôle is directorie
         if ( FALSE == exists_File((char*)argv[1]) )        return EXIT_FAILURE;    // contrôle si programme
-        dir = std::filesystem::path((const char*)(char*)argv[1]).parent_path().c_str();
         command = arg_2;
     }
-    if (argc > 2)  return EXIT_FAILURE;
 
+	if (argc > 2)  return EXIT_FAILURE;
 
+	dir  = (const char*)getcwd(NULL, 0);
 
 
 /// -----------------------------------------------------------------------------
@@ -346,9 +369,7 @@ int main(int argc, char *argv[])
 
     // Connect some signals
     g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
-
-
-    g_signal_connect(terminal, "child-exited",  G_CALLBACK (close_window), NULL);
+ 	g_signal_connect(terminal, "child-exited",  G_CALLBACK (close_window), NULL);
 
 
     g_signal_connect(terminal, "window-title-changed", G_CALLBACK(on_title_changed), NULL);

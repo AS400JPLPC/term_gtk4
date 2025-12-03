@@ -1,8 +1,14 @@
 #include <filesystem>
 #include <sys/stat.h>
+#include <X11/Xlib.h>
+
+
+
 
 #include <vte/vte.h>
 #include <adwaita.h>
+#include <glib/gprintf.h>
+#include <gtk-4.0/gdk/gdk.h>
 
 
 GtkWidget *window, *terminal;
@@ -88,8 +94,21 @@ void term_spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpointe
 void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 {
 	vte_terminal_set_size (VTE_TERMINAL(terminal),_col,_row);
-	gtk_widget_set_visible(window,TRUE);
+	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1
 }
+
+/// -----------------------------------------------------------------------------
+/// possibility to change the name of the terminal
+/// -----------------------------------------------------------------------------
+void on_title_changed(GtkWidget *terminal)
+{
+    const char *title;
+    title = vte_terminal_get_termprop_string_by_id(VTE_TERMINAL(terminal), VTE_PROPERTY_ID_XTERM_TITLE, NULL);
+
+	gtk_window_set_title (GTK_WINDOW(window), title);
+
+}
+
 
 ///-------------------------------------
 /// traitement ALT+F4
@@ -101,6 +120,7 @@ void close_window() {
 
 
 }
+
 
 
 gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget   *self)
@@ -127,6 +147,11 @@ static void showAlert_cb()
 {
 
     dialog = adw_alert_dialog_new ("confirm destroy Application", NULL);
+
+
+	adw_alert_dialog_set_body (ADW_ALERT_DIALOG (dialog), "Please be careful");
+
+
     adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog),
                                   "yes",   "_YES",
                                   "no",    "_NO",
@@ -152,21 +177,48 @@ static void showAlert_cb()
 void	init_Terminal()
 {
 
-    unsigned int COL=	126;// 120 cols  src
-    unsigned int ROW =	43;// 42  lines src
-    #define VTEFONT	"Source code Pro"
+
 	VteTerminal *VTE;
+
+    #define VTEFONT	"Source code Pro"
+
 
 	gchar * font_terminal = (char*) malloc (50);
 
 	/// confortable and extend numbers columns and rows
 	// HELIX
-	sprintf(font_terminal,"%s %s" , VTEFONT," 14");
+
+    unsigned int COL=	126; // 120 cols  src
+    unsigned int ROW =	40;  // 38  lines src
 
 
+    //determines the maximum size for screens
+    Display* d = XOpenDisplay(NULL);
+    gint  s = DefaultScreen(d);
+    // obsolète
+    gint width  = DisplayWidth(d, s);;
+    gint height = DisplayHeight(d, s);
+
+
+    if ( width <= 1600 && height >=1024 ) {                // ex: 13"... 15"
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"10");
+        }
+    else if ( width <= 1920 && height >=1080 ) {           // ex: 17"... 32"
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
+        }
+    else if ( width > 1920 && width<= 2560  ) {            //  ex: 2560 x1600 > 27"  font 13
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
+    }
+    else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 14
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"14");
+    }
+
+
+	//printf(" font_term  %s  %d\n",font_terminal, g_utf8_validate(font_terminal,-1,NULL));
 
 	// resize  title  font
 	VTE = VTE_TERMINAL (terminal);
+
 
 	vte_terminal_set_font (VTE,pango_font_description_from_string(font_terminal));	/// font use
 
@@ -189,6 +241,8 @@ void	init_Terminal()
 
 int main (int   argc,   char *argv[])  {
 
+	if (argc >4 || argc < 3 )  return EXIT_FAILURE;
+
 
 //printf("\n nbr argc %d", argc);
 
@@ -198,13 +252,6 @@ int main (int   argc,   char *argv[])  {
 
 
 	std::setlocale(LC_ALL, "");
-    gchar *pgm_1[]  = { (gchar*)WORKPGM,  NULL}; // hx
-
-
-
-    gchar *arg3  = (char*) malloc (200);
-    if ( argc == 4 ) { sprintf(arg3,"%s",(gchar*) argv[3]); } else sprintf(arg3,"%c",'\0');
-    gchar *pgm_2[] = { (gchar*)WORKPGM,(char*)"-c",  (gchar*) arg3, NULL}; // hx file
 
 
 
@@ -212,8 +259,7 @@ int main (int   argc,   char *argv[])  {
     gchar ** command ;
 
 	gchar *Title  = (char*) malloc (200);
-	sprintf(Title,"Project: %s",(gchar*) argv[1] ); // PROJECT
-//printf("\n debug %s", Title);
+	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
 
 	const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
     /// -----------------------------------------------------------------------------
@@ -232,18 +278,28 @@ int main (int   argc,   char *argv[])  {
     if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
 //printf(" nbr argc %d", argc);
 
-        if (argc >4 || argc < 3 )  return EXIT_FAILURE;
-        if (argc == 3) {
+    if (argc == 3) {
+		if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;
+			gchar *pgm_1[]  = {(gchar*)WORKPGM ,NULL}; // hx
             command = pgm_1;
-//printf("\n debug %s", (gchar*)WORKPGM);
-        }
-        if (argc == 4) {
+
+    }
+	if (argc == 4) {
+			gchar *arg3  = (char*) malloc (200);
+			g_sprintf(arg3,"%s",(gchar*) argv[3]);
+			gchar *pgm_2[] = { (gchar*)WORKPGM,(gchar*)"-c",  (gchar*) arg3,NULL};
             command = pgm_2;
 
-        };
+	};
 
 
-    adw_init ();
+	//printf(" dir       %s  %d\n",dir,g_utf8_validate(dir,-1,NULL));
+	//printf(" pgm_1[0]  %s  %d\n",pgm_1[0], g_utf8_validate(pgm_1[0],-1,NULL));
+	//printf(" pgm_2[0]  %s  %d\n",pgm_2[0], g_utf8_validate(pgm_2[0],-1,NULL));
+	//printf(" pgm_2[2]  %s  %d\n",pgm_2[2], g_utf8_validate(pgm_2[2],-1,NULL));
+	//printf(" Title     %s  %d\n",Title, g_utf8_validate(Title,-1,NULL));
+
+	adw_init ();
     window = gtk_window_new ();
 
 
@@ -267,7 +323,7 @@ int main (int   argc,   char *argv[])  {
 		VTE_PTY_DEFAULT, // VtePtyFlags pty_flags,
 
 		dir,			// const char *working_directory PROJECT ex; $home/myproject/src-zig
-		command,		// command
+		command,		// command    call pgm and parm
 
 		NULL,			// environment
 		(GSpawnFlags)(G_SPAWN_SEARCH_PATH |G_SPAWN_FILE_AND_ARGV_ZERO),		// spawn flags
@@ -284,15 +340,17 @@ int main (int   argc,   char *argv[])  {
 
     gtk_window_set_child(GTK_WINDOW(window), terminal);
 
-    g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
+
+    g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
     g_signal_connect(terminal,"child-exited", G_CALLBACK (close_window), NULL);
-    g_signal_connect(terminal, "resize-window", G_CALLBACK(on_resize_window),NULL);
+    g_signal_connect(terminal,"resize-window", G_CALLBACK(on_resize_window),NULL);
+	g_signal_connect(terminal, "window-title-changed", G_CALLBACK(on_title_changed), NULL);
 
 
-    gtk_window_present (GTK_WINDOW(window));
+    gtk_window_present (GTK_WINDOW (window));
 
     while (g_list_model_get_n_items (gtk_window_get_toplevels ()) > 0)
-        g_main_context_iteration (NULL, TRUE);
+    g_main_context_iteration (NULL, TRUE);
 
 
 

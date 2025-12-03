@@ -1,9 +1,11 @@
 #include <filesystem>
 #include <sys/stat.h>
+#include <X11/Xlib.h>
+
 
 #include <vte/vte.h>
 #include <adwaita.h>
-
+#include <glib/gprintf.h>
 
 GtkWidget *window, *terminal;
 GtkAlertDialog *Alertdialog;
@@ -87,8 +89,22 @@ void term_spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpointe
 void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 {
 	vte_terminal_set_size (VTE_TERMINAL(terminal),_col,_row);
-	gtk_widget_set_visible(window,TRUE);
+	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1);
 }
+
+
+/// -----------------------------------------------------------------------------
+/// possibility to change the name of the terminal
+/// -----------------------------------------------------------------------------
+void on_title_changed(GtkWidget *terminal)
+{
+    const char *title;
+    title = vte_terminal_get_termprop_string_by_id(VTE_TERMINAL(terminal), VTE_PROPERTY_ID_XTERM_TITLE, NULL);
+
+	gtk_window_set_title (GTK_WINDOW(window), title);
+
+}
+
 
 ///-------------------------------------
 /// traitement ALT+F4
@@ -141,16 +157,42 @@ static void showAlert_cb()
 void	init_Terminal()
 {
 
-	unsigned int COL=	126;// 120 cols  src
-	unsigned int ROW =	43;// 42  lines src
-	#define VTEFONT	"Source code Pro"
+
 	VteTerminal *VTE;
+
+    #define VTEFONT	"Source code Pro"
+
 
 	gchar * font_terminal = (char*) malloc (50);
 
 	/// confortable and extend numbers columns and rows
 	// HELIX
-	sprintf(font_terminal,"%s %s" , VTEFONT," 14");
+
+    unsigned int COL=	126; // 120 cols  src
+    unsigned int ROW =	40;  // 38  lines src
+
+
+    //determines the maximum size for screens
+    Display* d = XOpenDisplay(NULL);
+    gint  s = DefaultScreen(d);
+    // obsolète
+    gint width  = DisplayWidth(d, s);;
+    gint height = DisplayHeight(d, s);
+
+
+    if ( width <= 1600 && height >=1024 ) {                // ex: 13"... 15"
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"10");
+        }
+    else if ( width <= 1920 && height >=1080 ) {           // ex: 17"... 32"
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
+        }
+    else if ( width > 1920 && width<= 2560  ) {            //  ex: 2560 x1600 > 27"  font 13
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
+    }
+    else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 14
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"14");
+    }
+
 
 
 
@@ -178,33 +220,24 @@ void	init_Terminal()
 
 int main (int   argc,   char *argv[])  {
 
+	if (argc >4 || argc < 3 )  return EXIT_FAILURE;
 
-//printf("\n nbr argc %d", argc);
-
-//printf("\n nbr argv 0  %s", argv[0]);
-//printf("\n nbr argv 1  %s", argv[1]);
-//printf("\n nbr argv 2  %s", argv[2]);
 
 
 	std::setlocale(LC_ALL, "");
-	gchar *pgm_1[]  = { (gchar*)WORKPGM,  NULL}; // hx
-
-
-
-    gchar *arg3  = (char*) malloc (200);
-    if ( argc == 4 ) { sprintf(arg3,"%s",(gchar*) argv[3]); } else sprintf(arg3,"%c",'\0');
-    gchar *pgm_2[] = { (gchar*)WORKPGM,(char*)"-c",  (gchar*) arg3, NULL}; // hx file
 
 
 
 
-	gchar ** command ;
+    gchar ** command ;
 
 	gchar *Title  = (char*) malloc (200);
-	sprintf(Title,"Project: %s",(gchar*) argv[1] ); // PROJECT
-//printf("\n debug %s", Title);
+	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
 
 	const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
+
+
+
 	/// -----------------------------------------------------------------------------
 	/// -----------------------------------------------------------------------------
 	/// -----------------------------------------------------------------------------
@@ -218,20 +251,21 @@ int main (int   argc,   char *argv[])  {
 	/// ALT-F4 CLOSE windows HX
 	/// Button mini / maxi ON
 
-	if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
-//printf(" nbr argc %d", argc);
+    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
 
-		if (argc >4 || argc < 3 )  return EXIT_FAILURE;
+    if (argc == 3) {
+		if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;
+			gchar *pgm_1[]  = {(gchar*)WORKPGM ,NULL}; // hx
+            command = pgm_1;
 
-		if (argc == 3) {
-			command = pgm_1;
-//printf("\n debug %s", (gchar*)WORKPGM);
-		}
+    }
+	if (argc == 4) {
+			gchar *arg3  = (char*) malloc (200);
+			g_sprintf(arg3,"%s",(gchar*) argv[3]);
+			gchar *pgm_2[] = { (gchar*)WORKPGM,(gchar*)"-c",  (gchar*) arg3,NULL};
+            command = pgm_2;
 
-		if (argc == 4) {
-			command = pgm_2;
-		};
-
+	};
 //==============================================================================================
 //==============================================================================================
 	gtk_init ();
@@ -278,18 +312,15 @@ int main (int   argc,   char *argv[])  {
 	g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
 	g_signal_connect(terminal,"child-exited", G_CALLBACK (close_window), NULL);
 	g_signal_connect(terminal, "resize-window", G_CALLBACK(on_resize_window),NULL);
-
+	g_signal_connect(terminal, "window-title-changed", G_CALLBACK(on_title_changed), NULL);
 
 
 	Alertdialog = gtk_alert_dialog_new("confirm destroy Application");
 	const char* buttons[] = {"YES","NO",NULL};
-	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Contents of the message");
+	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Please be careful");
 	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
 	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
 	gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
-
-
-
 
 
 
