@@ -178,5 +178,14 @@ TermHX
 ![](asset/2025112_012345_TermADW-01.png)
 <br />
 
+025_12_10_01:24 :  alternative 
+
+Il y a une rupture de scratch avec l'API   « set_set_terminal_async »  , mais pas avec GTK3. 
+
+TermHX est réalisé avec GTK3  VTE 2.91.  
+
+
+
+
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)

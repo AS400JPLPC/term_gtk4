@@ -171,5 +171,13 @@ TermADW   call helix
 ![](asset/2025112_012345_TermADW-01.png)
 <br />
 
+<br />
 
+2025_12_10_01:24 :  alternative 
+
+There is a scratch break with the API   ‘set_set_terminal_async’  , but not with GTK3. 
+
+TermHX is made with GTK3  VTE 2.91.  
+
+<br />
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
