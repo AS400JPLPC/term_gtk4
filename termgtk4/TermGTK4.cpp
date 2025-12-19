@@ -4,8 +4,8 @@
 
 
 #include <vte/vte.h>
-#include <adwaita.h>
 #include <glib/gprintf.h>
+#include <gtk-4.0/gdk/gdk.h>
 
 GtkWidget *window, *terminal;
 GtkAlertDialog *Alertdialog;
@@ -14,6 +14,8 @@ GPid child_pid = 0;
 
 
 #define WORKPGM		"hx"
+#define WORKENV		"~/.helix"
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //	function alphanumeric switch
@@ -240,32 +242,33 @@ int main (int   argc,   char *argv[])  {
 
 
 
+
 	gchar *Title  = (char*) malloc (200);
 	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
 
-	gchar *envdir = (gchar*) argv[2];         // lib work
+	gchar *wrkdir = (gchar*) argv[2];         // lib work
+
+/// ----------------------------------------------------
+    // Définir le PATH (ajoute ton chemin au PATH existant)
+    const char *env_path = g_getenv("PATH");
+    char *new_path = g_strdup_printf("PATH=%s:%s", env_path, WORKENV);
+
+    // Tableau des variables d'environnement (doit se terminer par NULL)
+    char *envp[] = {
+        new_path,  // Ajoute ton chemin au PATH
+        (gchar*)"TERM=xterm-256color"  // Exemple d'autre variable
+    };
     /// ----------------------------------------------------
 
-    const gchar *wrkdir = (gchar*)"~/.helix";                           // directory for hx (HELIX)
-	gchar *pgm_1[]  = {(gchar*)WORKPGM ,(gchar*)"-w", envdir ,NULL};    // hx
+
+    gchar *pgm_1[]  = {(gchar*)WORKPGM ,(gchar*)"-w", wrkdir,NULL};    // hx
     gchar ** command  = pgm_1;
-
-
 
 //==============================================================================================
 //==============================================================================================
 	gtk_init ();
-
-
-
-	Alertdialog = gtk_alert_dialog_new("confirm destroy Application");
-	const char* buttons[] = {"YES","NO",NULL};
-	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Please be careful");
-	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
-	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
-    gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
-
 	window = gtk_window_new ();
+
 
 
 	gtk_window_set_title(GTK_WINDOW(window),Title);
@@ -273,8 +276,6 @@ int main (int   argc,   char *argv[])  {
 	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
 
 	gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
-
-    gtk_window_unminimize (GTK_WINDOW(window));
 
 	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
 
@@ -292,8 +293,8 @@ int main (int   argc,   char *argv[])  {
 
 		wrkdir ,		// const char *working_directory PROJECT
 		command ,		// command    call pgm and parm
-		NULL ,			// environment
-		(GSpawnFlags)(G_SPAWN_SEARCH_PATH ),		// spawn flags
+		envp ,			// environment
+		(GSpawnFlags)(G_SPAWN_SEARCH_PATH |G_SPAWN_FILE_AND_ARGV_ZERO),		// spawn flags
 		NULL,			// GSpawnChildSetupFunc child_setup,
 		NULL,			// gpointer child_setup_data,
 		NULL,			// GDestroyNotify child_setup_data_destroy,
@@ -307,7 +308,17 @@ int main (int   argc,   char *argv[])  {
 
 	gtk_window_set_child(GTK_WINDOW(window), terminal);
 
-	g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
+	Alertdialog = gtk_alert_dialog_new("confirm destroy Application");
+	const char* buttons[] = {"YES","NO",NULL};
+	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Please be careful");
+	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
+	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
+    gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
+
+
+
+
+    g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
 	g_signal_connect(terminal,"child-exited", G_CALLBACK (close_window), NULL);
 	g_signal_connect(terminal, "resize-window", G_CALLBACK(on_resize_window),NULL);
 	g_signal_connect(terminal, "window-title-changed", G_CALLBACK(on_title_changed), NULL);
