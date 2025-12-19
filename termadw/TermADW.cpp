@@ -18,7 +18,7 @@ AdwAlertDialog *Alertdialog;
 GPid child_pid = 0;
 
 
-#define WORKPGM		"/home/soleil/.helix/hx"
+#define WORKPGM		"hx"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //	function alphanumeric switch
@@ -210,7 +210,7 @@ void	init_Terminal()
         g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
     }
     else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 14
-        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"14");
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
     }
 
 
@@ -241,63 +241,38 @@ void	init_Terminal()
 
 int main (int   argc,   char *argv[])  {
 
-	if (argc >4 || argc < 3 )  return EXIT_FAILURE;
 
 
-//printf("\n nbr argc %d", argc);
+	std::setlocale(LC_ALL, "fr_FR.utf8");
 
-//printf("\n nbr argv 0  %s", argv[0]);
-//printf("\n nbr argv 1  %s", argv[1]);
-//printf("\n nbr argv 2  %s", argv[2]);
+    if (argc != 3) return EXIT_FAILURE;
 
+    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
 
-	std::setlocale(LC_ALL, "");
-
-
-
-
-    gchar ** command ;
-
-	gchar *Title  = (char*) malloc (200);
-	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
-
-	const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
-    /// -----------------------------------------------------------------------------
     /// -----------------------------------------------------------------------------
     /// -----------------------------------------------------------------------------
     /// 4 argument
     /// 0= le programe TermHX
     /// 1= Project
     /// 2= directory working
-    /// 3= file option 66
     /// contrôle autorisation traitement --> protection
     /// BUTTON CLOSE off
     /// ALT-F4 CLOSE windows HX
     /// Button mini / maxi ON
 
-    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
-//printf(" nbr argc %d", argc);
-
-    if (argc == 3) {
-		if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;
-			gchar *pgm_1[]  = {(gchar*)WORKPGM ,NULL}; // hx
-            command = pgm_1;
-
-    }
-	if (argc == 4) {
-			gchar *arg3  = (char*) malloc (200);
-			g_sprintf(arg3,"%s",(gchar*) argv[3]);
-			gchar *pgm_2[] = { (gchar*)WORKPGM,(gchar*)"-c",  (gchar*) arg3,NULL};
-            command = pgm_2;
-
-	};
 
 
-	//printf(" dir       %s  %d\n",dir,g_utf8_validate(dir,-1,NULL));
-	//printf(" pgm_1[0]  %s  %d\n",pgm_1[0], g_utf8_validate(pgm_1[0],-1,NULL));
-	//printf(" pgm_2[0]  %s  %d\n",pgm_2[0], g_utf8_validate(pgm_2[0],-1,NULL));
-	//printf(" pgm_2[2]  %s  %d\n",pgm_2[2], g_utf8_validate(pgm_2[2],-1,NULL));
-	//printf(" Title     %s  %d\n",Title, g_utf8_validate(Title,-1,NULL));
+
+	gchar *Title  = (char*) malloc (200);
+	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
+
+	gchar *envdir = (gchar*) argv[2];         // lib work
+    /// ----------------------------------------------------
+
+    const gchar *wrkdir = (gchar*)"~/.helix";                           // directory for hx (HELIX)
+	gchar *pgm_1[]  = {(gchar*)WORKPGM ,(gchar*)"-w", envdir ,NULL};    // hx
+    gchar ** command  = pgm_1;
+
 
 	adw_init ();
     window = gtk_window_new ();
@@ -310,7 +285,10 @@ int main (int   argc,   char *argv[])  {
 
     gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
 
+    gtk_window_unminimize (GTK_WINDOW(window));
+
     gtk_window_set_modal(GTK_WINDOW(window),TRUE);
+
 
 
     // specific initialization of the terminal
@@ -322,7 +300,7 @@ int main (int   argc,   char *argv[])  {
 		VTE_TERMINAL(terminal), //VteTerminal *terminal
 		VTE_PTY_DEFAULT, // VtePtyFlags pty_flags,
 
-		dir,			// const char *working_directory PROJECT ex; $home/myproject/src-zig
+		wrkdir,			// const char *working_directory PROJECT ex; $home/myproject/src-zig
 		command,		// command    call pgm and parm
 
 		NULL,			// environment

@@ -49,7 +49,7 @@ ifeq ($(PROD), true)
 			`pkg-config --cflags glib-2.0`
 
 #  -no-pie because it's the master program of the project so the caller  `pkg-config gmodule-2.0 --libs`
-LDFLAGS =	-lX11 -no-pie `pkg-config --libs gtk4 libadwaita-1` `pkg-config --libs vte-2.91-gtk4` libadwaita-1 -licuuc
+LDFLAGS =	-lX11 -no-pie `pkg-config --libs gtk4 libadwaita-1` `pkg-config --libs vte-2.91-gtk4`  -licuuc
 
 OPTIMIZE = -fexpensive-optimizations -Os -s
 

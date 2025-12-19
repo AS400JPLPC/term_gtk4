@@ -71,14 +71,6 @@ inline bool isDir_File(const std::string& name) {
 		return TRUE;
 }
 
-// programme linux test is dir
-static gchar * Dir_File(const std::string& name) {
-        std::string xdir = std::filesystem::path(name.c_str()).parent_path();
-        gchar * dirx = (char*) malloc (200);
-        g_sprintf(dirx,"%s" , xdir.c_str());
-        return dirx;
-}
-
 
 /// -----------------------------------------------------------------------------
 /// Callback for vte_terminal_spawn_async	retrived PID terminal ONLY
@@ -226,42 +218,37 @@ void	init_Terminal()
 
 int main (int   argc,   char *argv[])  {
 
-	//if (argc !< 3 )  return EXIT_FAILURE;
-
-    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
 
 	std::setlocale(LC_ALL, "fr_FR.utf8");
 
+    if (argc != 3) return EXIT_FAILURE;
+
+    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
+
+
+    /// -----------------------------------------------------------------------------
+    /// -----------------------------------------------------------------------------
+    /// 4 argument
+    /// 0= le programe TermHX
+    /// 1= Project
+    /// 2= directory working
+    /// contrôle autorisation traitement --> protection
+    /// BUTTON CLOSE off
+    /// ALT-F4 CLOSE windows HX
+    /// Button mini / maxi ON
 
 
 
 
 	gchar *Title  = (char*) malloc (200);
-	//g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
-    g_sprintf(Title,"Project: %s","ZTERM");
+	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
 
-	//const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
+	gchar *envdir = (gchar*) argv[2];         // lib work
+    /// ----------------------------------------------------
 
-   // const gchar *wrkdir = (gchar*)"/home/soleil/Zterm/src-zig/";
-
-    const gchar *wrkdir = Dir_File("~/.helix");
-	gchar *pgm_1[]  = {(gchar*)WORKPGM ,(gchar*)"-w", (gchar*)"/home/soleil/Zterm/src-zig/",NULL}; // hx
-     gchar ** command  = pgm_1;
-    //gchar *env[] = {(gchar*)"/home/soleil/.helix",NULL};
-    //gchar ** wrkenv  = env;
-
-	/// -----------------------------------------------------------------------------
-	/// -----------------------------------------------------------------------------
-	/// -----------------------------------------------------------------------------
-	/// 4 argument
-	/// 0= le programe TermHX
-	/// 1= Project
-	/// 2= directory working
-	/// 3= file option 66
-	/// contrôle autorisation traitement --> protection
-	/// BUTTON CLOSE off
-	/// ALT-F4 CLOSE windows HX
-	/// Button mini / maxi ON
+    const gchar *wrkdir = (gchar*)"~/.helix";                           // directory for hx (HELIX)
+	gchar *pgm_1[]  = {(gchar*)WORKPGM ,(gchar*)"-w", envdir ,NULL};    // hx
+    gchar ** command  = pgm_1;
 
 
 
@@ -286,6 +273,8 @@ int main (int   argc,   char *argv[])  {
 	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
 
 	gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
+
+    gtk_window_unminimize (GTK_WINDOW(window));
 
 	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
 
