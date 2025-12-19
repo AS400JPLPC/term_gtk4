@@ -1,0 +1,16 @@
+cd /home/soleil/vte-master
+
+ installed vala
+ installed gobject-introspection
+ installed glib2-devel
+ installed meson
+
+
+
+ex
+
+export PKG_CONFIG_PATH=$HOME/.mygtk4/lib/pkgconfig
+export LD_LIBRARY_PATH=$HOME/.mygtk4/lib/
+export PATH=$PATH:$HOME/.mygtk4
+export PATH=$PATH:$HOME/.mygtk4/lib
+export PATH=$PATH:$HOME/.mygtk4/share

@@ -20,10 +20,9 @@ INCLUDES =\
 
 INCLIB =\
 -I`pkg-config --libs gtk4` \
--I`pkg-config --libs vte-2.91-gtk4 ` \
+-I`pkg-config --libs vte-2.91-gtk4` \
 -I`pkg-config --libs libadwaita-1` \
--I`pkg-config --cflags glib-2.0`
-
+-I`pkg-config --libs glib-2.0`
 
 
 #/usr/lib/x86_64-linux-gnu/libdl.so
@@ -33,8 +32,8 @@ RESULT = $(BINDIR)$(PROJET)
 
 
 # choix du compilateur :
-CXX = g++
-#CXX =clang++
+#CXX = g++
+CXX =clang++
 
 # options compilations : voir vte-dev  -Wextra -Wno-unused-parameter   use juste for debug only for you  -Os -s
 # -------------------------------------------------------------------
@@ -43,14 +42,14 @@ CXX = g++
 ifeq ($(PROD), true)
  CPPFLAGS=	-std=c++20 \
  	        -Wall	-fexceptions	-pedantic-errors	-Wno-parentheses	-Waddress	\
- 			-Wsign-compare -fpermissive 	-fstack-clash-protection \
+ 			-Wsign-compare -fpermissive 	-fstack-clash-protection\
             `pkg-config --cflags gtk4` \
- 			`pkg-config --cflags vte-2.91-gtk4` \
+            `pkg-config --cflags vte-2.91-gtk4` \
             `pkg-config --cflags libadwaita-1` \
 			`pkg-config --cflags glib-2.0`
 
 #  -no-pie because it's the master program of the project so the caller  `pkg-config gmodule-2.0 --libs`
-LDFLAGS =	-lX11 -no-pie `pkg-config --libs gtk4  vte-2.91-gtk4  libadwaita-1 glib-2.0`
+LDFLAGS =	-lX11 -no-pie `pkg-config --libs gtk4 libadwaita-1` `pkg-config --libs vte-2.91-gtk4` libadwaita-1 -licuuc
 
 OPTIMIZE = -fexpensive-optimizations -Os -s
 
@@ -61,13 +60,13 @@ OPTIMIZE = -fexpensive-optimizations -Os -s
 else
 CPPFLAGS=	-std=c++20 -ggdb -g3  \
 			-Wall	-fexceptions	-pedantic-errors	-Wno-parentheses	-Waddress \
-			-Wsign-compare -fpermissive \
+			-Wsign-compare -fpermissive  \
             `pkg-config --cflags gtk4` \
-			`pkg-config --cflags vte-2.91-gtk4` \
+            `pkg-config --cflags vte-2.91-gtk4` \
             `pkg-config --cflags libadwaita-1` \
 			`pkg-config --cflags glib-2.0`
 
-LDFLAGS =	-lX11   -no-pie  `pkg-config --libs gtk4  vte-2.91-gtk4  libadwaita-1 glib-2.0`
+LDFLAGS =	-lX11   -no-pie  `pkg-config --libs gtk4 libadwaita-1` `pkg-config --libs vte-2.91-gtk4`    -licuuc
 
 OPTIMIZE =
 endif

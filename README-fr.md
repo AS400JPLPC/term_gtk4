@@ -152,7 +152,25 @@ Les dialogues de libadwaita suivent les guidelines GNOME, ce qui garantit une ap
 
 
 le module "TermGTK" n'utilise  la lib adwaita pour la décoration.  tout est écrit pure GTK
+<br />
+_____________________________________________________________________________
+<br />
+<br />
 
+j'ai mis la procédure pour installé gtk4 4.20.3 vte4 0.78.4 adawiata 1.3.0  
+  
+le fichier install une fois tous compiller   
+  
+après  vous pouurez faire des terminaux basic pour vos application  ou toutes fonction claviers sont mise a disposition.. asini que l'affichage. 
+
+<br />
+
+je remercie pour l'aide prédieuse :  
+  
+[une source à prendre en compte](https://fr.linuxfromscratch.org/view/blfs-old/gnome/vte.html)
+<br />
+
+<br />
 
 <br />
 example:
@@ -177,15 +195,6 @@ TermHX
 
 ![](asset/2025112_012345_TermADW-01.png)
 <br />
-
-025_12_10_01:24 :  alternative 
-
-Il y a une rupture de scratch avec l'API   « set_set_terminal_async »  , mais pas avec GTK3. 
-
-TermHX est réalisé avec GTK3  VTE 2.91.  
-
-
-
 
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)

@@ -22,7 +22,7 @@ INCLIB =\
 -I`pkg-config --libs gtk4` \
 -I`pkg-config --libs vte-2.91-gtk4 ` \
 -I`pkg-config --libs libadwaita-1` \
--I`pkg-config --cflags glib-2.0`
+-I`pkg-config --libs glib-2.0`
 
 
 

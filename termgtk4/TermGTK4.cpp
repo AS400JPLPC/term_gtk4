@@ -13,7 +13,7 @@ GtkAlertDialog *Alertdialog;
 GPid child_pid = 0;
 
 
-#define WORKPGM		"/home/soleil/.helix/hx"
+#define WORKPGM		"hx"
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //	function alphanumeric switch
@@ -71,7 +71,13 @@ inline bool isDir_File(const std::string& name) {
 		return TRUE;
 }
 
-
+// programme linux test is dir
+static gchar * Dir_File(const std::string& name) {
+        std::string xdir = std::filesystem::path(name.c_str()).parent_path();
+        gchar * dirx = (char*) malloc (200);
+        g_sprintf(dirx,"%s" , xdir.c_str());
+        return dirx;
+}
 
 
 /// -----------------------------------------------------------------------------
@@ -220,23 +226,29 @@ void	init_Terminal()
 
 int main (int   argc,   char *argv[])  {
 
-	if (argc >4 || argc < 3 )  return EXIT_FAILURE;
+	//if (argc !< 3 )  return EXIT_FAILURE;
+
+    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
+
+	std::setlocale(LC_ALL, "fr_FR.utf8");
 
 
 
-	std::setlocale(LC_ALL, "");
 
-
-
-
-    gchar ** command ;
 
 	gchar *Title  = (char*) malloc (200);
-	g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
+	//g_sprintf(Title,"Project: %s",(gchar*) argv[1]); // PROJECT
+    g_sprintf(Title,"Project: %s","ZTERM");
 
-	const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
+	//const gchar *dir = (gchar*) argv[2];  // parm lib work parm file
 
+   // const gchar *wrkdir = (gchar*)"/home/soleil/Zterm/src-zig/";
 
+    const gchar *wrkdir = Dir_File("~/.helix");
+	gchar *pgm_1[]  = {(gchar*)WORKPGM ,(gchar*)"-w", (gchar*)"/home/soleil/Zterm/src-zig/",NULL}; // hx
+     gchar ** command  = pgm_1;
+    //gchar *env[] = {(gchar*)"/home/soleil/.helix",NULL};
+    //gchar ** wrkenv  = env;
 
 	/// -----------------------------------------------------------------------------
 	/// -----------------------------------------------------------------------------
@@ -251,24 +263,20 @@ int main (int   argc,   char *argv[])  {
 	/// ALT-F4 CLOSE windows HX
 	/// Button mini / maxi ON
 
-    if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;	// contrôle file exist helix
 
-    if (argc == 3) {
-		if ( FALSE == ctrlPgm(WORKPGM))		return EXIT_FAILURE;
-			gchar *pgm_1[]  = {(gchar*)WORKPGM ,NULL}; // hx
-            command = pgm_1;
 
-    }
-	if (argc == 4) {
-			gchar *arg3  = (char*) malloc (200);
-			g_sprintf(arg3,"%s",(gchar*) argv[3]);
-			gchar *pgm_2[] = { (gchar*)WORKPGM,(gchar*)"-c",  (gchar*) arg3,NULL};
-            command = pgm_2;
-
-	};
 //==============================================================================================
 //==============================================================================================
 	gtk_init ();
+
+
+
+	Alertdialog = gtk_alert_dialog_new("confirm destroy Application");
+	const char* buttons[] = {"YES","NO",NULL};
+	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Please be careful");
+	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
+	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
+    gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
 
 	window = gtk_window_new ();
 
@@ -282,20 +290,21 @@ int main (int   argc,   char *argv[])  {
 	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
 
 
+
+
 	// specific initialization of the terminal
 	terminal = vte_terminal_new();
 	init_Terminal();
 
-	//vte_terminal_spawn_async(
+
 	vte_terminal_spawn_async(
 		VTE_TERMINAL(terminal), //VteTerminal *terminal
 		VTE_PTY_DEFAULT, // VtePtyFlags pty_flags,
 
-		dir,			// const char *working_directory PROJECT ex; $home/myproject/src-zig
-		command,		// command
-
-		NULL,			// environment
-		(GSpawnFlags)(G_SPAWN_SEARCH_PATH |G_SPAWN_FILE_AND_ARGV_ZERO),		// spawn flags
+		wrkdir ,		// const char *working_directory PROJECT
+		command ,		// command    call pgm and parm
+		NULL ,			// environment
+		(GSpawnFlags)(G_SPAWN_SEARCH_PATH ),		// spawn flags
 		NULL,			// GSpawnChildSetupFunc child_setup,
 		NULL,			// gpointer child_setup_data,
 		NULL,			// GDestroyNotify child_setup_data_destroy,
@@ -305,7 +314,7 @@ int main (int   argc,   char *argv[])  {
 		&term_spawn_callback,   // VteTerminalSpawnAsyncCallback callback, get pid child
 
 		NULL
-	);
+    );
 
 	gtk_window_set_child(GTK_WINDOW(window), terminal);
 
@@ -315,12 +324,6 @@ int main (int   argc,   char *argv[])  {
 	g_signal_connect(terminal, "window-title-changed", G_CALLBACK(on_title_changed), NULL);
 
 
-	Alertdialog = gtk_alert_dialog_new("confirm destroy Application");
-	const char* buttons[] = {"YES","NO",NULL};
-	gtk_alert_dialog_set_detail (GTK_ALERT_DIALOG(Alertdialog), "Please be careful");
-	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
-	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
-	gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
 
 
 

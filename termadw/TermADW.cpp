@@ -94,7 +94,7 @@ void term_spawn_callback(VteTerminal *terminal, GPid pid, GError *error, gpointe
 void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 {
 	vte_terminal_set_size (VTE_TERMINAL(terminal),_col,_row);
-	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1
+	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1);
 }
 
 /// -----------------------------------------------------------------------------

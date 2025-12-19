@@ -171,13 +171,32 @@ TermADW   call helix
 ![](asset/2025112_012345_TermADW-01.png)
 <br />
 
-<br />
-
-2025_12_10_01:24 :  alternative 
-
-There is a scratch break with the API   ‘set_set_terminal_async’  , but not with GTK3. 
-
-TermHX is made with GTK3  VTE 2.91.  
 
 <br />
+_____________________________________________________________________________
+<br />
+<br />
+
+jI have included the procedure for installing gtk4 4.20.3, vte4 0.78.4, and adawiata 1.3.0.  
+  
+The installation file once everything has been compiled.   
+  
+Afterwards, you will be able to create basic terminals for your applications, where all keyboard functions are available, as well as the display. 
+
+<br />
+
+I would like to thank you for your invaluable help: 
+<br />
+
+
+[une source à prendre en compte](https://fr.linuxfromscratch.org/view/blfs-old/gnome/vte.html)
+<br />
+
+<br />
+
+
+
+
+
+
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
