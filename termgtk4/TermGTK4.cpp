@@ -13,8 +13,14 @@ GtkAlertDialog *Alertdialog;
 GPid child_pid = 0;
 
 
+const bool ALT_F4 = true;
+
+
 #define WORKPGM		"hx"
 #define WORKENV		"~/.helix"
+
+
+
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,25 +122,27 @@ void close_window() {
 
 
 gboolean dialog_cb (GObject *source_object, GAsyncResult *res, gpointer user_data) {
-  	GtkAlertDialog *dialog = GTK_ALERT_DIALOG (source_object);
-	GError *err = NULL;
-	int button= gtk_alert_dialog_choose_finish (GTK_ALERT_DIALOG(dialog), res, &err);
 
 
-	if (button == 0)
-
-	{
-		gtk_window_destroy(GTK_WINDOW(window));
-	}
+        GtkAlertDialog *dialog = GTK_ALERT_DIALOG (source_object);
+	    GError *err = NULL;
+	    int button= gtk_alert_dialog_choose_finish (GTK_ALERT_DIALOG(dialog), res, &err);
 
 
-	if (button == 1)
+	    if (button == 0)
 
-	{
-		gtk_window_present (GTK_WINDOW(window));
+	    {
+		    gtk_window_destroy(GTK_WINDOW(window));
+	    }
 
-		return TRUE;
-	}
+
+	    if (button == 1)
+
+	    {
+		    gtk_window_present (GTK_WINDOW(window));
+
+		    return TRUE;
+	    }
 
 	return FALSE;
 }
@@ -143,8 +151,8 @@ gboolean dialog_cb (GObject *source_object, GAsyncResult *res, gpointer user_dat
 static void showAlert_cb()
 {
 
-	gtk_alert_dialog_choose (GTK_ALERT_DIALOG(Alertdialog), GTK_WINDOW(window),
-							NULL, (GAsyncReadyCallback) dialog_cb, NULL);
+    gtk_alert_dialog_choose (GTK_ALERT_DIALOG(Alertdialog), GTK_WINDOW(window),
+						NULL, (GAsyncReadyCallback) dialog_cb, NULL);
 
 	gtk_window_present (GTK_WINDOW(window));
 	g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);
@@ -160,7 +168,7 @@ void	init_Terminal()
 
 	VteTerminal *VTE;
 
-    #define VTEFONT	"Source code Pro"
+    #define VTEFONT	"SourceCodePro"
 
 
 	gchar * font_terminal = (char*) malloc (50);
@@ -190,7 +198,7 @@ void	init_Terminal()
         g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
     }
     else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 14
-        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"14");
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
     }
 
 
@@ -215,7 +223,11 @@ void	init_Terminal()
 
 	vte_terminal_set_cursor_shape(VTE,VTE_CURSOR_SHAPE_BLOCK);						/// define cursor 'block'
 
+    const GdkRGBA Back = GdkRGBA{0.0,0.0,0.0,1.0};
+    vte_terminal_set_color_background(VTE,&Back);                                   /// define color background
 
+    const GdkRGBA Fore = GdkRGBA{255.0,255.0,255.0,1.0};
+    vte_terminal_set_color_foreground(VTE,&Fore);                                   /// define color foreground
 }
 
 int main (int   argc,   char *argv[])  {
@@ -275,10 +287,10 @@ int main (int   argc,   char *argv[])  {
 
 	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
 
-	gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
-
 	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
 
+    if (ALT_F4 == true ) gtk_window_set_deletable (GTK_WINDOW(window),true);
+    else gtk_window_set_deletable (GTK_WINDOW(window),false);
 
 
 
@@ -314,8 +326,6 @@ int main (int   argc,   char *argv[])  {
 	gtk_alert_dialog_set_buttons (GTK_ALERT_DIALOG(Alertdialog), buttons);
 	gtk_alert_dialog_set_default_button ( GTK_ALERT_DIALOG(Alertdialog), 1);
     gtk_alert_dialog_set_modal(GTK_ALERT_DIALOG(Alertdialog),TRUE);
-
-
 
 
     g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), NULL);

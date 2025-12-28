@@ -17,6 +17,8 @@ AdwAlertDialog *Alertdialog;
 
 GPid child_pid = 0;
 
+const bool ALT_F4 = false;  // true very special ???
+
 
 #define WORKPGM		"hx"
 #define WORKENV		"~/.helix"
@@ -148,27 +150,32 @@ gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget 
 static void showAlert_cb()
 {
 
-    dialog = adw_alert_dialog_new ("confirm destroy Application", NULL);
+    if  ( ALT_F4 == true) {
+
+        dialog = adw_alert_dialog_new ("confirm destroy Application", NULL);
 
 
-	adw_alert_dialog_set_body (ADW_ALERT_DIALOG (dialog), "Please be careful");
+	    adw_alert_dialog_set_body (ADW_ALERT_DIALOG (dialog), "Please be careful");
 
 
-    adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog),
-                                  "yes",   "_YES",
-                                  "no",    "_NO",
-                                  NULL);
+        adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog),
+                                      "yes",   "_YES",
+                                      "no",    "_NO",
+                                      NULL);
 
 
-    Alertdialog = ADW_ALERT_DIALOG (dialog);
-    adw_alert_dialog_choose (Alertdialog, GTK_WIDGET (window),
-                           NULL, (GAsyncReadyCallback) dialog_cb, window);
+        Alertdialog = ADW_ALERT_DIALOG (dialog);
+        adw_alert_dialog_choose (Alertdialog, GTK_WIDGET (window),
+                               NULL, (GAsyncReadyCallback) dialog_cb, window);
 
-	adw_alert_dialog_set_default_response(  Alertdialog, "no");
+	    adw_alert_dialog_set_default_response(  Alertdialog, "no");
 
 
-    adw_dialog_present (dialog, window);
+        adw_dialog_present (dialog, window);
 
+    }
+
+    gtk_window_present (GTK_WINDOW(window));
     g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
 
 }
@@ -238,7 +245,11 @@ void	init_Terminal()
 
 	vte_terminal_set_cursor_shape(VTE,VTE_CURSOR_SHAPE_BLOCK);						/// define cursor 'block'
 
+    const GdkRGBA Back = GdkRGBA{0.0,0.0,0.0,1.0};
+    vte_terminal_set_color_background(VTE,&Back);                                   /// define color background
 
+    const GdkRGBA Fore = GdkRGBA{255.0,255.0,255.0,1.0};
+    vte_terminal_set_color_foreground(VTE,&Fore);                                   /// define color foreground
 }
 
 int main (int   argc,   char *argv[])  {
@@ -292,13 +303,17 @@ int main (int   argc,   char *argv[])  {
 
 
 
-    gtk_window_set_title(GTK_WINDOW(window),Title);
+	gtk_window_set_title(GTK_WINDOW(window),Title);
 
-    gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
+	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
 
-    gtk_window_set_deletable (GTK_WINDOW(window),TRUE);
+	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
 
-    gtk_window_set_modal(GTK_WINDOW(window),TRUE);
+    if (ALT_F4 == true )
+        gtk_window_set_deletable (GTK_WINDOW(window),true);
+    else
+        gtk_window_set_deletable (GTK_WINDOW(window),false);
+
 
 
 

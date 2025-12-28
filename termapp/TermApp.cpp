@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <sys/stat.h>
 #include <X11/Xlib.h>
-
+#include <unistd.h>        // chdir
 
 
 
@@ -25,7 +25,7 @@
 /// ex:
 ///------------------------------------------
 
- #define _ALTF4_ 1 /// ALT_F4 ACTIVE
+const bool ALT_F4 = true;  // contrôle close Process
 
 
 
@@ -37,7 +37,7 @@
 /// ----------------------------------------
 /// par default
 ///-----------------------------------------
-#define VTENAME "VTE-TERM5250"
+#define VTENAME "TERM5250"
 
 
 
@@ -76,6 +76,7 @@ bool ctrlPgm(std::string v_TEXT)
 				{
 					case  strswitch("Gencurs")		: b_pgm =true;		break;
                     case  strswitch("Pcurs")		: b_pgm =true;		break;
+                    case  strswitch("defrep")		: b_pgm =true;		break;
 				}
 	return b_pgm;
 }
@@ -122,6 +123,8 @@ gboolean dialog_cb (AdwAlertDialog *dialog,  GAsyncResult   *result,  GtkWidget 
 static void showAlert_cb()
 {
 
+
+    if ( ALT_F4 == true ) {
     dialog = adw_alert_dialog_new ("confirm destroy Application", NULL);
 
 
@@ -143,6 +146,9 @@ static void showAlert_cb()
 
     adw_dialog_present (dialog, window);
 
+    } else     gtk_window_present (GTK_WINDOW (window));
+
+
     g_signal_connect(window,"close-request", G_CALLBACK (showAlert_cb), window);
 
 }
@@ -163,7 +169,7 @@ void	init_Terminal()
 
 	VteTerminal *VTE;
 
-    #define VTEFONT	"Source code Pro"
+    #define VTEFONT	"SourceCodePro"
 
 
 	gchar * font_terminal = (char*) malloc (50);
@@ -171,8 +177,8 @@ void	init_Terminal()
 	/// confortable and extend numbers columns and rows
 	// HELIX
 
-    unsigned int COL=	132; // 120 cols  src
-    unsigned int ROW =	40;  // 38  lines src
+    unsigned int COL=	160; //
+    unsigned int ROW =	42;  //
 
 
     //determines the maximum size for screens
@@ -189,11 +195,11 @@ void	init_Terminal()
     else if ( width <= 1920 && height >=1080 ) {           // ex: 17"... 32"
         g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
         }
-    else if ( width > 1920 && width<= 2560  ) {            //  ex: 2560 x1600 > 27"  font 13
-        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
+    else if ( width > 1920 && width<= 2560  ) {            //  ex: 2560 x1600 > 27"  font 12
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
     }
-    else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 14
-        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
+    else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 12
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
     }
 
 
@@ -219,7 +225,11 @@ void	init_Terminal()
 
 	vte_terminal_set_cursor_shape(VTE,VTE_CURSOR_SHAPE_BLOCK);						/// define cursor 'block'
 
+    const GdkRGBA Back = GdkRGBA{0.0,0.0,0.0,1.0};
+    vte_terminal_set_color_background(VTE,&Back);                                   /// define color background
 
+    const GdkRGBA Fore = GdkRGBA{255.0,255.0,255.0,1.0};
+    vte_terminal_set_color_foreground(VTE,&Fore);                                   /// define color foreground
 }
 
 
@@ -249,8 +259,10 @@ void on_title_changed(GtkWidget *terminal)
 
 void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 {
+    gtk_window_set_resizable (GTK_WINDOW(window),true);
 	vte_terminal_set_size (VTE_TERMINAL(terminal),_col,_row);
 	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1);
+    gtk_window_set_resizable (GTK_WINDOW(window),false);
 }
 
 
@@ -329,6 +341,10 @@ int main(int argc, char *argv[])
     // definir le PATH de travail
     wrkdir  = Dir_File(argv[2]);
 
+   // if ( chdir( wrkdir ) != 0 ) {
+   //     fprintf( stderr, "Impossible de se placer dans le dossier %s.\n", wrkdir );
+   //     exit( EXIT_FAILURE );
+   // }
 
 /// -----------------------------------------------------------------------------
 /// -----------------------------------------------------------------------------
@@ -370,16 +386,19 @@ int main(int argc, char *argv[])
     window = gtk_window_new ();
 
 	gtk_window_set_title(GTK_WINDOW(window),VTENAME);  // name PROJECT
+    gtk_window_set_decorated (GTK_WINDOW(window),false);
+    gtk_window_set_modal(GTK_WINDOW(window),TRUE);	   //
 
-    gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
-
-    gtk_window_set_modal(GTK_WINDOW(window),TRUE);			   // <--- spécifique helix
-
-    #ifdef _ALTF4_
+    if (ALT_F4 == true ) {
         gtk_window_set_deletable (GTK_WINDOW(window),true);
-    #else
+        gtk_window_set_resizable (GTK_WINDOW(window),true);
+    }
+    else {
         gtk_window_set_deletable (GTK_WINDOW(window),false);
-    #endif
+        gtk_window_unmaximize (GTK_WINDOW(window));
+        gtk_window_set_resizable (GTK_WINDOW(window),false);
+    }
+
 
 
 	/* Initialise the terminal */
