@@ -1,4 +1,8 @@
 # term_gtk4
+
+**Je fais des tests pour améliorer** 
+
+
 Terminal window for your console applications
 
 Je sje suis heureux de partager TermHX, un outil que j’ai développé il y a plus de 5 ans pour répondre à un besoin spécifique :
@@ -157,16 +161,16 @@ _____________________________________________________________________________
 <br />
 <br />
 
-j'ai mis la procédure pour installé gtk4 4.20.3 vte4 0.78.4 adawiata 1.3.0  
-  
-le fichier install une fois tous compiller   
-  
-après  vous pouurez faire des terminaux basic pour vos application  ou toutes fonction claviers sont mise a disposition.. asini que l'affichage. 
+j'ai mis la procédure pour installé gtk4 4.20.3 vte4 0.78.4 adawiata 1.3.0
+
+le fichier install une fois tous compiller
+
+après  vous pouurez faire des terminaux basic pour vos application  ou toutes fonction claviers sont mise a disposition.. asini que l'affichage.
 
 <br />
 
-je remercie pour l'aide prédieuse :  
-  
+je remercie pour l'aide prédieuse :
+
 [une source à prendre en compte](https://fr.linuxfromscratch.org/view/blfs-old/gnome/vte.html)
 <br />
 

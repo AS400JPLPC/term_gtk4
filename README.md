@@ -1,4 +1,8 @@
 # term_gtk4
+
+**I am conducting tests to improve**
+
+
 Terminal window for your console applications
 I am pleased to share TermHX, a tool I developed over five years ago to meet a specific need:
 encapsulating terminal applications in a secure graphical window.

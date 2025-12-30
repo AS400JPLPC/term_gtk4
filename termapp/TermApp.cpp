@@ -225,11 +225,6 @@ void	init_Terminal()
 
 	vte_terminal_set_cursor_shape(VTE,VTE_CURSOR_SHAPE_BLOCK);						/// define cursor 'block'
 
-    const GdkRGBA Back = GdkRGBA{0.0,0.0,0.0,1.0};
-    vte_terminal_set_color_background(VTE,&Back);                                   /// define color background
-
-    const GdkRGBA Fore = GdkRGBA{255.0,255.0,255.0,1.0};
-    vte_terminal_set_color_foreground(VTE,&Fore);                                   /// define color foreground
 }
 
 
@@ -272,50 +267,44 @@ void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 
 inline bool exists_File (const std::string& name) {
 	struct stat fileStat;
-	if(stat(name.c_str(),&fileStat) < 0) return false;  	// is exist objet
-
-	stat(name.c_str(),&fileStat);
-	if (S_ISDIR(fileStat.st_mode) == 1 ) return false;  	// is dir
-
-	if ((fileStat.st_mode & S_IXUSR) == 0 ) return false; 	// pas un executable
-
-	return (stat (name.c_str(), &fileStat) == 0);
+	if(stat(name.c_str(),&fileStat) != 0 ) { printf("\nNot exist -> %s\n",name.c_str()); return false;} 	// is exist objet
+	return true;
 }
 
 
 // programme linux pas d'extention windows ".exe"
 inline bool extention_File(const std::string& name) {
 		std::filesystem::path filePath = name.c_str();
-		if (filePath.extension()!= "") return false;
+		if (filePath.extension()!= "") { printf("\nExtension->invalide  %s\n",name.c_str()); return false; }
 		return true;
 }
 
 inline bool isDir_File(const std::string& name) {
 		std::string strdir = std::filesystem::path(name.c_str()).parent_path();
-		if (strdir.empty() ) return false;
+		if (strdir.empty() ) { printf("\nDIR ->invalide  %s\n",strdir.c_str()); return false;}
 		return true;
 }
 
 
 
-static gchar * Env_File(const std::string& name) {
+static char * Env_File(const std::string& name) {
         std::string xdir = std::filesystem::path(name.c_str()).parent_path();
-        gchar * dirx = (char*) malloc (100);
+        gchar * dirx = (char*) malloc (256);
         g_sprintf(dirx,"%s" , xdir.c_str());
         return dirx;
 }
 
 
-static gchar * Pgm_File(const std::string& name) {
+static char * Pgm_File(const std::string& name) {
         std::filesystem::path p(name.c_str());
         gchar * pgm = (char*) malloc (100);
         g_sprintf(pgm,"%s" , p.stem().c_str());
         return pgm;
 }
 
-static gchar * Dir_File(const std::string& name) {
+static char * Dir_File(const std::string& name) {
         std::string xdir = std::filesystem::path(name.c_str());
-        gchar * dirx = (char*) malloc (100);
+        gchar * dirx = (char*) malloc (256);
         g_sprintf(dirx,"%s" , xdir.c_str());
         return dirx;
 }

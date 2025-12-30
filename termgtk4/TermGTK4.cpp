@@ -55,29 +55,24 @@ bool ctrlPgm(std::string v_TEXT)
 
 inline bool exists_File (const std::string& name) {
 	struct stat fileStat;
-	if(stat(name.c_str(),&fileStat) < 0) return FALSE;  	// is exist objet
-
-	stat(name.c_str(),&fileStat);
-	if (S_ISDIR(fileStat.st_mode) == 1 ) return FALSE;  	// is dir
-
-	if ((fileStat.st_mode & S_IXUSR) == 0 ) return FALSE; 	// pas un executable
-
-	return (stat (name.c_str(), &fileStat) == 0);
+	if(stat(name.c_str(),&fileStat) != 0 ) { printf("\nNot exist -> %s\n",name.c_str()); return false;} 	// is exist objet
+	return true;
 }
 
 
 // programme linux pas d'extention windows ".exe"
 inline bool extention_File(const std::string& name) {
 		std::filesystem::path filePath = name.c_str();
-		if (filePath.extension()!= "") return FALSE;
-		return TRUE;
+		if (filePath.extension()!= "") { printf("\nExtension->invalide  %s\n",name.c_str()); return false; }
+		return true;
 }
 
 inline bool isDir_File(const std::string& name) {
 		std::string strdir = std::filesystem::path(name.c_str()).parent_path();
-		if (strdir.empty() ) return FALSE;
-		return TRUE;
+		if (strdir.empty() ) { printf("\nDIR ->invalide  %s\n",strdir.c_str()); return false;}
+		return true;
 }
+
 
 
 /// -----------------------------------------------------------------------------
@@ -96,6 +91,7 @@ void on_resize_window(GtkWidget *terminal, guint  _col, guint _row)
 {
 	vte_terminal_set_size (VTE_TERMINAL(terminal),_col,_row);
 	gtk_window_set_default_size(GTK_WINDOW(window),-1,-1);
+    gtk_window_present(GTK_WINDOW(window));
 }
 
 
@@ -223,11 +219,6 @@ void	init_Terminal()
 
 	vte_terminal_set_cursor_shape(VTE,VTE_CURSOR_SHAPE_BLOCK);						/// define cursor 'block'
 
-    const GdkRGBA Back = GdkRGBA{0.0,0.0,0.0,1.0};
-    vte_terminal_set_color_background(VTE,&Back);                                   /// define color background
-
-    const GdkRGBA Fore = GdkRGBA{255.0,255.0,255.0,1.0};
-    vte_terminal_set_color_foreground(VTE,&Fore);                                   /// define color foreground
 }
 
 int main (int   argc,   char *argv[])  {
