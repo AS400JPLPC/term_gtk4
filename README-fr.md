@@ -158,32 +158,6 @@ Les dialogues de libadwaita suivent les guidelines GNOME, ce qui garantit une ap
 le module "TermGTK" n'utilise  la lib adwaita pour la décoration.  tout est écrit pure GTK
 <br />
 _____________________________________________________________________________
-<br />
-<br />
-
-j'ai mis la procédure pour installé gtk4 4.20.3 vte4 0.78.4 adawiata 1.3.0
-
-le fichier install une fois tous compiller
-
-après  vous pouurez faire des terminaux basic pour vos application  ou toutes fonction claviers sont mise a disposition.. asini que l'affichage.
-
-<br />
-
-je remercie pour l'aide prédieuse :
-
-[une source à prendre en compte](https://fr.linuxfromscratch.org/view/blfs-old/gnome/vte.html)
-<br />
-
-<br />
-
-<br />
-example:
-PS : n'oubliez de changer le répertoire "soleil"
-<br />
-```
-make -C /home/soleil/TerminalHX/ -f ./src_c/MakefileTermADW PROD=false clean all PGM=TermADW
-```
-<br />
 
 myprojet
 

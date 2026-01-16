@@ -3,7 +3,7 @@
 #include <X11/Xlib.h>
 
 
-#include <vte/vte.h>
+#include <vte-2.91-gtk4/vte/vte.h>
 #include <glib/gprintf.h>
 #include <gtk-4.0/gdk/gdk.h>
 
@@ -19,7 +19,7 @@ const bool ALT_F4 = true;
 #define WORKPGM		"hx"
 #define WORKENV		"~/.helix"
 
-
+// vte4 0.82.3-1
 
 
 
@@ -164,7 +164,7 @@ void	init_Terminal()
 
 	VteTerminal *VTE;
 
-    #define VTEFONT	"SourceCodePro"
+    #define VTEFONT	"Fira Code Regular"
 
 
 	gchar * font_terminal = (char*) malloc (50);
@@ -259,7 +259,8 @@ int main (int   argc,   char *argv[])  {
     // Tableau des variables d'environnement (doit se terminer par NULL)
     char *envp[] = {
         new_path,  // Ajoute ton chemin au PATH
-        (gchar*)"TERM=xterm-256color"  // Exemple d'autre variable
+        (gchar*)"TERM=xterm-256color",  // Exemple d'autre variable
+		NULL
     };
     /// ----------------------------------------------------
 
@@ -279,6 +280,8 @@ int main (int   argc,   char *argv[])  {
 	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
 
 	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
+
+	gtk_widget_set_valign(window,GTK_ALIGN_START);
 
     if (ALT_F4 == true ) gtk_window_set_deletable (GTK_WINDOW(window),true);
     else gtk_window_set_deletable (GTK_WINDOW(window),false);

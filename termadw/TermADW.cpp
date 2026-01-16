@@ -5,7 +5,7 @@
 
 
 
-#include <vte/vte.h>
+#include <vte-2.91-gtk4/vte/vte.h>
 #include <adwaita.h>
 #include <glib/gprintf.h>
 #include <gtk-4.0/gdk/gdk.h>
@@ -20,8 +20,8 @@ GPid child_pid = 0;
 const bool ALT_F4 = false;  // true very special ???
 
 
-#define WORKPGM		"hx"
-#define WORKENV		"~/.helix"
+#define WORKPGM		"nvim"
+#define WORKENV		"/usr/bin"
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ bool ctrlPgm(std::string v_TEXT)
 	std::filesystem::path p(v_TEXT.c_str());
 				switch(strswitch(p.stem().c_str()))
 					{
-						case  strswitch("hx")		: b_pgm =TRUE;		break;
+						case  strswitch("nvim")		: b_pgm =TRUE;		break;
 				}
 	return b_pgm;
 }
@@ -184,7 +184,7 @@ void	init_Terminal()
 
 	VteTerminal *VTE;
 
-    #define VTEFONT	"Source code Pro"
+    #define VTEFONT	"Fira Code Regular"
 
 
 	gchar * font_terminal = (char*) malloc (50);
@@ -193,7 +193,7 @@ void	init_Terminal()
 	// HELIX
 
     unsigned int COL=	126; // 120 cols  src
-    unsigned int ROW =	40;  // 38  lines src
+    unsigned int ROW =	42;  // 40  lines src 
 
 
     //determines the maximum size for screens
@@ -203,17 +203,21 @@ void	init_Terminal()
     gint width  = DisplayWidth(d, s);;
     gint height = DisplayHeight(d, s);
 
+    // specifique xfce4  my screen 3840    = 1920 : 1080
 
-    if ( width <= 1600 && height >=1024 ) {                // ex: 13"... 15"
+//printf(" width %d  height %d",  width , height);
+
+
+    if ( width <= 1600 && height <=1024 ) {	                    // ex: 13"... 15" font 10
         g_sprintf(font_terminal,"%s  %s" , VTEFONT,"10");
         }
-    else if ( width <= 1920 && height >=1080 ) {           // ex: 17"... 32"
-        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"12");
+    else if ( width <= 1920 && height <=1080 ) {                // ex: 17"... 32" font 12
+        g_sprintf(font_terminal,"%s  %s" , VTEFONT,"14");       // xfce4 arandr 3  big screen 14
         }
-    else if ( width > 1920 && width<= 2560  ) {            //  ex: 2560 x1600 > 27"  font 13
+    else if ( width > 1920 && width < 2560  ) {                  //  ex: 2560 x1600 > 27"  font 13
         g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
-    }
-    else if ( width > 2560  ) {                            //  ex: 3840 x2160 > 32"  font 14
+     }
+    else if ( width >= 2560  ) {                                //  ex: 3840 x2160 > 32"  font 13
         g_sprintf(font_terminal,"%s  %s" , VTEFONT,"13");
     }
 
@@ -279,7 +283,8 @@ int main (int   argc,   char *argv[])  {
     // Tableau des variables d'environnement (doit se terminer par NULL)
     char *envp[] = {
         new_path,  // Ajoute ton chemin au PATH
-        (gchar*)"TERM=xterm-256color"  // Exemple d'autre variable
+        (gchar*)"TERM=xterm-256color",  // Exemple d'autre variable
+		NULL,
     };
     /// ----------------------------------------------------
 
@@ -298,6 +303,8 @@ int main (int   argc,   char *argv[])  {
 	gtk_window_set_resizable (GTK_WINDOW(window),TRUE);
 
 	gtk_window_set_modal(GTK_WINDOW(window),TRUE);
+	
+	gtk_widget_set_valign(window,GTK_ALIGN_START);
 
     if (ALT_F4 == true )
         gtk_window_set_deletable (GTK_WINDOW(window),true);
